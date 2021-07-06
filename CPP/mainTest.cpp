@@ -5,6 +5,6 @@ using namespace std;
 
 int main()
 {
-    Test();
+    CalculateTestCase();
     return 0;
 }
