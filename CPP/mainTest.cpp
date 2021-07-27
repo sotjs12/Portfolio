@@ -1,10 +1,10 @@
-#include "Stack.h"
+#include "LinkedQueue.h"
 #include <iostream>
 
 using namespace std;
 
 int main()
 {
-    CalculateTestCase();
+    Test();
     return 0;
 }
