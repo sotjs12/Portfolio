@@ -368,3 +368,29 @@ rabbit.sayHi();                        // Rabbit
 Rabbit.prototype.sayHi();              // undefined 모두 Rabbit.prototype 가 this
 Object.getPrototypeOf(rabbit).sayHi(); // undefined
 rabbit.__proto__.sayHi();              // undefined
+
+function solution(participant, completion) {
+
+    let completionMap = completion.reduce((ret, key) => {
+        if (!ret[key]) ret[key] = 0;
+        ret[key]++;
+        return ret;
+    }, {});
+
+    let answer = "";
+    for (let i = 0, key = ""; i < participant.length; ++i) {
+        key = participant[i];
+        if (completionMap[key]) {
+            completionMap[key]--;
+            if(completionMap[key] < 0){
+                answer = key;
+                break;
+            }
+        }        
+        else{
+            answer = key;
+            break;
+        }
+    }
+    return answer;
+}
