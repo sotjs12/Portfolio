@@ -382,15 +382,202 @@ function solution(participant, completion) {
         key = participant[i];
         if (completionMap[key]) {
             completionMap[key]--;
-            if(completionMap[key] < 0){
+            if (completionMap[key] < 0) {
                 answer = key;
                 break;
             }
-        }        
-        else{
+        }
+        else {
             answer = key;
             break;
         }
     }
     return answer;
 }
+
+class Animal {
+    constructor(name) {
+        this.speed = 0;
+        this.name = name;
+    }
+
+    run = (speed) => {
+        this.speed = speed;
+        alert(`${this.name}가 속도 ${this.speed}로 달립니다.`);
+    }
+
+    stop() {
+        this.speed = 0;
+        alert(`${this.name}가 멈췄습니다.`);
+    }
+
+}
+
+class Rabbit extends Animal {
+    hide() {
+        alert(`${this.name}가 숨었습니다!`);
+    }
+
+    stop() {
+        super.stop(); // 부모 클래스의 stop을 호출해 멈추고,
+        this.hide(); // 숨습니다.
+    }
+}
+
+let rabbit = new Rabbit("흰 토끼");
+
+rabbit.run(5); // 흰 토끼가 속도 5로 달립니다.
+rabbit.stop(); // 흰 토끼가 멈췄습니다. 흰 토끼가 숨었습니다!
+
+
+//   아래 코드에서 Rabbit은 Animal을 상속받습니다.
+
+// 그런데 Rabbit 객체를 만들 수가 없습니다. 무엇이 잘못된 것일까요? 코드를 수정해보세요.
+
+class Animal {
+
+    constructor(name) {
+        this.name = name;
+    }
+
+}
+
+class Rabbit extends Animal {
+    constructor(name) {
+        this.name = name;
+        this.created = Date.now();
+    }
+}
+
+let rabbit = new Rabbit("White Rabbit"); // Error: this is not defined
+alert(rabbit.name);
+
+
+class Animal {
+
+    constructor(name) {
+        this.name = name;
+    }
+
+}
+class Rabbit extends Animal {
+    constructor(name) {
+        super(name);
+        this.created = Date.now();
+    }
+}
+
+// extends 로 선언한 클래스의 생성자 함수를 호출해주지 않으면 this가 없음
+// 생성자 오버라이딩을 안해주면 자동으로 super 생성자를 호출해주지만 커스텀에선 super객체를 명시적으로 해줘야 this 가 생김
+// 하지만 
+let rabbit = new Rabbit("White Rabbit");
+alert(rabbit.name);
+
+
+// 매 초마다 시간을 출력해주는 클래스 Clock이 있습니다.
+
+class Clock {
+    constructor({ template }) {
+        this.template = template;
+    }
+
+    render() {
+        let date = new Date();
+
+        let hours = date.getHours();
+        if (hours < 10) hours = '0' + hours;
+
+        let mins = date.getMinutes();
+        if (mins < 10) mins = '0' + mins;
+
+        let secs = date.getSeconds();
+        if (secs < 10) secs = '0' + secs;
+
+        let output = this.template
+            .replace('h', hours)
+            .replace('m', mins)
+            .replace('s', secs);
+
+        console.log(output);
+    }
+
+    stop() {
+        clearInterval(this.timer);
+    }
+
+    start() {
+        this.render();
+        this.timer = setInterval(() => this.render(), 1000);
+    }
+}
+// Clock을 상속받는 ExtendedClock을 만들고, precision(정확도)이라는 매개변수도 추가해보세요. precision은 ‘초’ 사이의 간격을 의미하고, 기본값은 1000(1초)이 되어야 합니다.
+
+// 새로운 파일(extended-clock.js)을 만들어 답을 작성해주세요.
+// clock.js은 수정하면 안 됩니다. 상속을 사용하세요.
+
+class ExtendedClock extends Clock {
+    constructor({ template, precision = 1000 }) {
+        super({ template });
+        this.template = template;
+        this.precision = precision;
+    }
+    start() {
+        this.render();
+        this.timer = setInterval(() => this.render(), this.precision);
+    }
+}
+
+class CoffeeMachine {
+    // ...
+
+    constructor(power) {
+        this._power = power;
+    }
+
+    get power() {
+        return this._power;
+    }
+
+}
+
+// 커피 머신 생성
+let coffeeMachine = new CoffeeMachine(100);
+
+alert(`전력량이 ${coffeeMachine.power}인 커피머신을 만듭니다.`); // 전력량이 100인 커피머신을 만듭니다.
+
+coffeeMachine.power = 25; // Error (setter 없음)
+
+let evMixin = {
+    on(eventName, handler) {
+        if (!this._handlers) this._handlers = {};
+        if (!this._handlers[eventName]) {
+            this._handlers[eventName] = [];
+        }
+        this._handlers[eventName].push(handler);
+    },
+    off(eventName, handler) {
+        let handlers = this._handlers?.[eventName];
+        if (!handlers) return;
+        for (let i = 0; i < handlers.length; ++i) {
+            if (handlers[i] === handler) {
+                handlers.slice(i--, 1);
+            }
+        }
+    },
+    trigger(eventName, ...args) {
+        let handlers = this._handlers?.[eventName];
+        if (!handlers) return;
+        handlers.forEach(handler => handler.call(this, ...args));
+    }
+}
+
+class Menu{
+    choose(val){
+        this.trigger("select",val);
+    }
+}
+Object.assign(Menu.prototype,evMixin);
+
+let menu = new Menu();
+menu.on("select",val=>console.log(val));
+menu.choose("1222");
