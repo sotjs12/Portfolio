@@ -1,4 +1,4 @@
-#include "Sort.h"
+#include "BinarySearch.h"
 #include <iostream>
 
 using namespace std;
