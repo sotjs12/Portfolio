@@ -571,13 +571,72 @@ let evMixin = {
     }
 }
 
-class Menu{
-    choose(val){
-        this.trigger("select",val);
+class Menu {
+    choose(val) {
+        this.trigger("select", val);
     }
 }
-Object.assign(Menu.prototype,evMixin);
+Object.assign(Menu.prototype, evMixin);
 
 let menu = new Menu();
-menu.on("select",val=>console.log(val));
+menu.on("select", val => console.log(val));
 menu.choose("1222");
+
+
+function delay(fn, ms) {
+    return function (...args) {
+        setTimeout(() => fn.call(this, ...args), ms);
+    }
+}
+function f(x) {
+    alert(x);
+}
+
+// create wrappers
+let f1000 = delay(f, 1000);
+let f1500 = delay(f, 1500);
+
+f1000("test"); // shows "test" after 1000ms
+f1500("test"); // shows "test" after 1500ms
+
+function debounce(func, ms) {
+    let timeout;
+    return function () {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, arguments), ms);
+    };
+}
+
+
+function throttle(func, ms) {
+    let lastArgs, isThrottled = false;
+    function wrapper() {
+        if (isThrottled) {
+            lastArgs = arguments;
+            return;
+        }
+        isThrottled = true;
+        func.apply(this, arguments);
+        setTimeout(() => {
+            isThrottled = false;
+            if (lastArgs) {
+                wrapper.apply(this, lastArgs);
+                lastArgs = null;
+            }
+        }, ms);
+    };
+    return wrapper;
+}
+
+
+
+function f(a) {
+    console.log(a);
+}
+
+// f1000 passes calls to f at maximum once per 1000 ms
+let f1000 = throttle(f, 1000);
+
+f1000(1); // shows 1
+f1000(2); // (throttling, 1000ms not out yet)
+f1000(3); // (throttling, 1000ms not out yet)
