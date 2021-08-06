@@ -640,3 +640,140 @@ let f1000 = throttle(f, 1000);
 f1000(1); // shows 1
 f1000(2); // (throttling, 1000ms not out yet)
 f1000(3); // (throttling, 1000ms not out yet)
+
+
+/*
+
+내장된 SyntaxError 클래스를 상속하는 FormatError 클래스를 만들어 봅시다.
+
+만들어진 클래스에서 message, name, stack를 참조할 수 있어야 합니다.
+
+참고 예시입니다.
+
+*/
+class FormatError extends SyntaxError {
+    constructor(message) {
+        super(message);
+        this.name = this.constructor.name;
+    }
+}
+
+let err = new FormatError("formatting error");
+
+alert(err.message); // formatting error
+alert(err.name); // FormatError
+alert(err.stack); // stack
+
+alert(err instanceof FormatError); // true
+alert(err instanceof SyntaxError); // true (SyntaxError 클래스를 상속받았기 때문입니다.)
+
+
+function delay(ms) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+delay(3000).then(() => alert('3초후 실행'));
+
+function loadScript(src) {
+    return new Promise(function (resolve, reject) {
+        let script = document.createElement('script');
+        script.src = src;
+
+        script.onload = () => resolve(script);
+        script.onerror = () => reject(new Error(`${src}를 불러오는 도중에 에러가 발생함`));
+
+        document.head.append(script);
+    });
+}
+
+loadScript("/article/promise-chaining/one.js")
+    .then(script => loadScript("/article/promise-chaining/two.js"))
+    .then(script => loadScript("/article/promise-chaining/three.js"))
+    .then(script => {
+        // 스크립트를 정상적으로 불러왔기 때문에 스크립트 내의 함수를 호출할 수 있습니다.
+        one();
+        two();
+        three();
+    });
+
+
+Promise.allSettled = function (promises) {
+    return Promise.all(promises.map(p => Promise.resolve(p).then(value => (
+        {
+            status: "fulfilled",
+            value
+        }), reason => ({
+            status: "rejected",
+            reason
+        })
+    )));
+}
+
+
+async function loadJson(url) {
+    let response = await fetch(url);
+    if (response.status == 200) {
+        return response.json();
+    } else {
+        throw new Error(response.status);
+    }
+}
+
+loadJson('no-such-user.json')
+    .catch(alert); // Error: 404
+
+
+/*
+async와 await를 사용해서 '다시 던지기' 예시 재작성하기
+프라미스 체이닝 챕터에서 다뤘던 ‘다시 던지기(rethrow)’ 관련 예시를 기억하실 겁니다. 이 예시를 .then/catch 대신 async/await를 사용해 다시 작성해 봅시다.
+
+그리고 demoGithubUser 안의 반복(recursion)은 반복문(loop)을 사용해 작성하도록 합시다. async/await를 사용하면 쉽게 작성할 수 있습니다.
+*/
+// 유효한 사용자를 찾을 때까지 반복해서 username을 물어봄
+class HttpError extends Error {
+    constructor(response) {
+        super(`${response.status} for ${response.url}`);
+        this.name = 'HttpError';
+        this.response = response;
+    }
+}
+
+async function loadJson(url) {
+    let response = await fetch(url);
+    if (response.status == 200) {
+        return response.json();
+    } else {
+        throw new Error(response.status);
+    }
+}
+async function demoGithubUser() {
+    while (true) {
+        try {
+            let name = prompt("GitHub username을 입력하세요.", "iliakan");
+            let user = await loadJson(`https://api.github.com/users/${name}`);
+            alert(`이름: ${user.name}.`);
+            return user;
+        } catch (err) {
+            if (err instanceof HttpError && err.response.status == 404) {
+                alert("일치하는 사용자가 없습니다. 다시 입력해 주세요.");
+            } else {
+                throw err;
+            }
+        }
+    }
+}
+
+demoGithubUser();
+
+async function wait() {
+    await new Promise(resolve => setTimeout(resolve, 1000));
+  
+    return 10;
+  }
+  
+  function f() {
+    // shows 10 after 1 second
+    wait().then(result => alert(result));
+  }
+  
+  f();
