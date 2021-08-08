@@ -123,3 +123,115 @@ function solution(progresses = [], speeds = []) {
     answer.push(++completeCnt);
     return answer;
 }
+
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42587?language=javascript
+프린터
+문제 설명
+일반적인 프린터는 인쇄 요청이 들어온 순서대로 인쇄합니다. 그렇기 때문에 중요한 문서가 나중에 인쇄될 수 있습니다. 이런 문제를 보완하기 위해 중요도가 높은 문서를 먼저 인쇄하는 프린터를 개발했습니다. 이 새롭게 개발한 프린터는 아래와 같은 방식으로 인쇄 작업을 수행합니다.
+
+1. 인쇄 대기목록의 가장 앞에 있는 문서(J)를 대기목록에서 꺼냅니다.
+2. 나머지 인쇄 대기목록에서 J보다 중요도가 높은 문서가 한 개라도 존재하면 J를 대기목록의 가장 마지막에 넣습니다.
+3. 그렇지 않으면 J를 인쇄합니다.
+예를 들어, 4개의 문서(A, B, C, D)가 순서대로 인쇄 대기목록에 있고 중요도가 2 1 3 2 라면 C D A B 순으로 인쇄하게 됩니다.
+
+내가 인쇄를 요청한 문서가 몇 번째로 인쇄되는지 알고 싶습니다. 위의 예에서 C는 1번째로, A는 3번째로 인쇄됩니다.
+
+현재 대기목록에 있는 문서의 중요도가 순서대로 담긴 배열 priorities와 내가 인쇄를 요청한 문서가 현재 대기목록의 어떤 위치에 있는지를 알려주는 location이 매개변수로 주어질 때, 내가 인쇄를 요청한 문서가 몇 번째로 인쇄되는지 return 하도록 solution 함수를 작성해주세요.
+
+제한사항
+현재 대기목록에는 1개 이상 100개 이하의 문서가 있습니다.
+인쇄 작업의 중요도는 1~9로 표현하며 숫자가 클수록 중요하다는 뜻입니다.
+location은 0 이상 (현재 대기목록에 있는 작업 수 - 1) 이하의 값을 가지며 대기목록의 가장 앞에 있으면 0, 두 번째에 있으면 1로 표현합니다.
+입출력 예
+priorities	location	return
+[2, 1, 3, 2]	2	1
+[1, 1, 9, 1, 1, 1]	0	5
+*/
+
+
+function solution(priorities = [], location) {
+    let answer = 0;
+    let sorted = [...priorities].sort();
+    let i = 0;
+
+    while (true) {
+        if (priorities[i] >= sorted[sorted.length - 1]) {
+            answer++;
+            if (i == location) {
+                break;
+            } else {
+                sorted.pop();
+                priorities.splice(i, 1);
+                if (i < location) location--;
+                if (i == priorities.length) i = 0;
+            }
+        }
+        else {
+            i = (i == priorities.length - 1) ? 0 : i + 1;
+        }
+    }
+
+    return answer;
+}
+
+let case_1 = [1, 1, 9, 1, 1, 1];
+let case_2 = 0;
+solution(case_1, case_2);
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42583?language=javascript
+다리를 지나는 트럭
+문제 설명
+트럭 여러 대가 강을 가로지르는 일차선 다리를 정해진 순으로 건너려 합니다. 모든 트럭이 다리를 건너려면 최소 몇 초가 걸리는지 알아내야 합니다. 다리에는 트럭이 최대 bridge_length대 올라갈 수 있으며, 다리는 weight 이하까지의 무게를 견딜 수 있습니다. 단, 다리에 완전히 오르지 않은 트럭의 무게는 무시합니다.
+
+예를 들어, 트럭 2대가 올라갈 수 있고 무게를 10kg까지 견디는 다리가 있습니다. 무게가 [7, 4, 5, 6]kg인 트럭이 순서대로 최단 시간 안에 다리를 건너려면 다음과 같이 건너야 합니다.
+
+경과 시간	다리를 지난 트럭	다리를 건너는 트럭	대기 트럭
+0	[]	[]	[7,4,5,6]
+1~2	[]	[7]	[4,5,6]
+3	[7]	[4]	[5,6]
+4	[7]	[4,5]	[6]
+5	[7,4]	[5]	[6]
+6~7	[7,4,5]	[6]	[]
+8	[7,4,5,6]	[]	[]
+따라서, 모든 트럭이 다리를 지나려면 최소 8초가 걸립니다.
+
+solution 함수의 매개변수로 다리에 올라갈 수 있는 트럭 수 bridge_length, 다리가 견딜 수 있는 무게 weight, 트럭 별 무게 truck_weights가 주어집니다. 이때 모든 트럭이 다리를 건너려면 최소 몇 초가 걸리는지 return 하도록 solution 함수를 완성하세요.
+
+제한 조건
+bridge_length는 1 이상 10,000 이하입니다.
+weight는 1 이상 10,000 이하입니다.
+truck_weights의 길이는 1 이상 10,000 이하입니다.
+모든 트럭의 무게는 1 이상 weight 이하입니다.
+입출력 예
+bridge_length	weight	truck_weights	return
+2	10	[7,4,5,6]	8
+100	100	[10]	101
+100	100	[10,10,10,10,10,10,10,10,10,10]	110
+*/
+
+function solution(bridge_length, maxWeight, truck_weights = []) {
+    let answer = 0;
+    let weightSum = 0;
+    let queue = new Array(bridge_length);
+    truck_weights = truck_weights.reverse();
+    queue.fill(0);
+
+    while (queue.length > 0) {
+        answer++;
+        weightSum -= queue.pop();
+        if (queue.length == bridge_length) continue;
+        if (truck_weights.length == 0) continue;
+        if (weightSum + truck_weights[truck_weights.length - 1] <= maxWeight) {
+            let weight = truck_weights.pop();
+            weightSum += weight;
+            queue.unshift(weight);
+        } else {
+            queue.unshift(0);
+        }
+    }
+
+    return answer;
+}

@@ -1,7 +1,5 @@
-#include <string>
-#include <vector>
-#include <algorithm>
-using namespace std;
+
+#include <iostream>
 
 /*
 https://programmers.co.kr/learn/courses/30/lessons/42577
@@ -37,18 +35,86 @@ phone_book	return
 
 2021년 3월 4일, 테스트 케이스가 변경되었습니다. 이로 인해 이전에 통과하던 코드가 더 이상 통과하지 않을 수 있습니다.
 */
-bool solution_42577(vector<string> phone_book)
+// #include <string>
+// #include <vector>
+// #include <algorithm>
+// using namespace std;
+
+// bool solution_42577(vector<string> phone_book)
+// {
+//     bool answer = true;
+//     sort(phone_book.begin(), phone_book.end());
+//     for (int i = 0; i < phone_book.size() - 1; ++i)
+//     {
+//         if (phone_book[i + 1].rfind(phone_book[i], 0) == 0)
+//         {
+//             answer = false;
+//             break;
+//         }
+//     }
+
+//     return answer;
+// }
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42584?language=cpp
+주식가격
+문제 설명
+초 단위로 기록된 주식가격이 담긴 배열 prices가 매개변수로 주어질 때, 가격이 떨어지지 않은 기간은 몇 초인지를 return 하도록 solution 함수를 완성하세요.
+
+제한사항
+prices의 각 가격은 1 이상 10,000 이하인 자연수입니다.
+prices의 길이는 2 이상 100,000 이하입니다.
+입출력 예
+prices	return
+[1, 2, 3, 2, 3]	[4, 3, 1, 1, 0]
+입출력 예 설명
+1초 시점의 ₩1은 끝까지 가격이 떨어지지 않았습니다.
+2초 시점의 ₩2은 끝까지 가격이 떨어지지 않았습니다.
+3초 시점의 ₩3은 1초뒤에 가격이 떨어집니다. 따라서 1초간 가격이 떨어지지 않은 것으로 봅니다.
+4초 시점의 ₩2은 1초간 가격이 떨어지지 않았습니다.
+5초 시점의 ₩3은 0초간 가격이 떨어지지 않았습니다.
+※ 공지 - 2019년 2월 28일 지문이 리뉴얼되었습니다.
+*/
+
+#include <string>
+#include <vector>
+#include <stack>
+
+using namespace std;
+
+vector<int> solution(vector<int> prices)
 {
-    bool answer = true;
-    sort(phone_book.begin(), phone_book.end());
-    for (int i = 0; i < phone_book.size() - 1; ++i)
+    stack<int> stack;
+    int time = 0;
+    vector<int> answer(prices.size());
+    for (int price : prices)
     {
-        if (phone_book[i + 1].rfind(phone_book[i], 0) == 0)
+        while (!stack.empty() && prices[stack.top()] > price)
         {
-            answer = false;
-            break;
+            answer[stack.top()] = time - stack.top();
+            stack.pop();
         }
+        stack.push(time);
+        time++;
     }
 
+    while (!stack.empty())
+    {
+        answer[stack.top()] = time - stack.top() - 1;
+        stack.pop();
+    }
     return answer;
+}
+
+int main()
+{
+    vector<int> prices = {1, 2, 3, 2, 3};
+    vector<int> result = solution(prices);
+    for (int r : result)
+    {
+        cout << r << ",";
+    }
+    cout << endl;
+    return 0;
 }
