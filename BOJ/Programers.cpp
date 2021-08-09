@@ -77,44 +77,146 @@ prices	return
 ※ 공지 - 2019년 2월 28일 지문이 리뉴얼되었습니다.
 */
 
+// #include <string>
+// #include <vector>
+// #include <stack>
+
+// using namespace std;
+
+// vector<int> solution(vector<int> prices)
+// {
+//     stack<int> stack;
+//     int time = 0;
+//     vector<int> answer(prices.size());
+//     for (int price : prices)
+//     {
+//         while (!stack.empty() && prices[stack.top()] > price)
+//         {
+//             answer[stack.top()] = time - stack.top();
+//             stack.pop();
+//         }
+//         stack.push(time);
+//         time++;
+//     }
+
+//     while (!stack.empty())
+//     {
+//         answer[stack.top()] = time - stack.top() - 1;
+//         stack.pop();
+//     }
+//     return answer;
+// }
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42626?language=cpp
+더 맵게
+문제 설명
+매운 것을 좋아하는 Leo는 모든 음식의 스코빌 지수를 K 이상으로 만들고 싶습니다. 모든 음식의 스코빌 지수를 K 이상으로 만들기 위해 Leo는 스코빌 지수가 가장 낮은 두 개의 음식을 아래와 같이 특별한 방법으로 섞어 새로운 음식을 만듭니다.
+
+섞은 음식의 스코빌 지수 = 가장 맵지 않은 음식의 스코빌 지수 + (두 번째로 맵지 않은 음식의 스코빌 지수 * 2)
+Leo는 모든 음식의 스코빌 지수가 K 이상이 될 때까지 반복하여 섞습니다.
+Leo가 가진 음식의 스코빌 지수를 담은 배열 scoville과 원하는 스코빌 지수 K가 주어질 때, 모든 음식의 스코빌 지수를 K 이상으로 만들기 위해 섞어야 하는 최소 횟수를 return 하도록 solution 함수를 작성해주세요.
+
+제한 사항
+scoville의 길이는 2 이상 1,000,000 이하입니다.
+K는 0 이상 1,000,000,000 이하입니다.
+scoville의 원소는 각각 0 이상 1,000,000 이하입니다.
+모든 음식의 스코빌 지수를 K 이상으로 만들 수 없는 경우에는 -1을 return 합니다.
+입출력 예
+scoville	K	return
+[1, 2, 3, 9, 10, 12]	7	2
+*/
+
+// #include <string>
+// #include <vector>
+// #include <queue>
+
+// using namespace std;
+
+// int solution(vector<int> scoville, int K)
+// {
+//     int answer = 0;
+//     priority_queue<int, vector<int>, greater<int> > pq;
+//     for (int value : scoville)
+//     {
+//         pq.push(value);
+//     }
+
+//     int poped = 0;
+//     while (!pq.empty())
+//     {
+//         poped = pq.top();
+//         pq.pop();
+
+//         if (poped >= K)
+//             continue;
+//         if (poped == 0 || pq.empty())
+//         {
+//             answer = -1;
+//             break;
+//         }
+//         answer++;
+//         poped = poped + (pq.top() * 2);
+//         pq.pop();
+//         pq.push(poped);
+//     }
+//     return answer;
+// }
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42627?language=cpp
+디스크 컨트롤러
+문제 설명
+하드디스크는 한 번에 하나의 작업만 수행할 수 있습니다. 디스크 컨트롤러를 구현하는 방법은 여러 가지가 있습니다. 가장 일반적인 방법은 요청이 들어온 순서대로 처리하는 것입니다.
+각 작업에 대해 [작업이 요청되는 시점, 작업의 소요시간]을 담은 2차원 배열 jobs가 매개변수로 주어질 때, 작업의 요청부터 종료까지 걸린 시간의 평균을 가장 줄이는 방법으로 처리하면 평균이 얼마가 되는지 return 하도록 solution 함수를 작성해주세요. (단, 소수점 이하의 수는 버립니다)
+
+제한 사항
+jobs의 길이는 1 이상 500 이하입니다.
+jobs의 각 행은 하나의 작업에 대한 [작업이 요청되는 시점, 작업의 소요시간] 입니다.
+각 작업에 대해 작업이 요청되는 시간은 0 이상 1,000 이하입니다.
+각 작업에 대해 작업의 소요시간은 1 이상 1,000 이하입니다.
+하드디스크가 작업을 수행하고 있지 않을 때에는 먼저 요청이 들어온 작업부터 처리합니다.
+입출력 예
+jobs	return
+[[0, 3], [1, 9], [2, 6]]	9
+
+*/
+
 #include <string>
 #include <vector>
-#include <stack>
+#include <queue>
 
 using namespace std;
 
-vector<int> solution(vector<int> prices)
+int solution(vector<vector<int> > jobs)
 {
-    stack<int> stack;
+    int answer = 0;
+    priority_queue<int, vector<int>, greater<pair<int, int> > > pq;
     int time = 0;
-    vector<int> answer(prices.size());
-    for (int price : prices)
+    for (pair<int,int> job : jobs)
     {
-        while (!stack.empty() && prices[stack.top()] > price)
+        while (!pq.empty() && job.first >= time)
         {
-            answer[stack.top()] = time - stack.top();
-            stack.pop();
+            time += pq.top();
+            answer += time;
+            pq.pop();
         }
-        stack.push(time);
-        time++;
-    }
+        if (job.first >= time)
+            time = job.first;
 
-    while (!stack.empty())
-    {
-        answer[stack.top()] = time - stack.top() - 1;
-        stack.pop();
+        pq.push(job.second);
     }
-    return answer;
+    while (!pq.empty())
+    {
+        time += pq.top();
+        answer += time;
+        pq.pop();
+    }
+    return answer / jobs.size();
 }
 
 int main()
 {
-    vector<int> prices = {1, 2, 3, 2, 3};
-    vector<int> result = solution(prices);
-    for (int r : result)
-    {
-        cout << r << ",";
-    }
-    cout << endl;
+    cout << solution({{0, 3}, {1, 9}, {2, 6}}) << endl;
     return 0;
 }
