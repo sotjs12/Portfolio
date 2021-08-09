@@ -1,4 +1,4 @@
-#include "BinarySearch.h"
+#include "Heap.h"
 #include <iostream>
 
 using namespace std;
