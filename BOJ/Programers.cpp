@@ -180,59 +180,118 @@ jobs	return
 
 */
 
+// #include <iostream>
+// #include <vector>
+// #include <queue>
+// #include <algorithm>
+
+// using namespace std;
+
+// class comp
+// {
+// public:
+//     bool operator()(const vector<int> &l, const vector<int> &r) const
+//     {
+//         return l[1] > r[1];
+//     }
+// };
+
+// bool compareJob(const vector<int> &l, const vector<int> &r)
+// {
+//     return l[0] < r[0];
+// }
+
+// int solution(vector<vector<int> > jobs)
+// {
+//     int answer = 0;
+//     int time = 0;
+//     int size = jobs.size();
+//     sort(jobs.begin(), jobs.end(), compareJob); //이게 필승 함정카드..
+//     priority_queue<vector<int>, vector<vector<int> >, comp> pq;
+
+//     for (vector<int> job : jobs)
+//     {
+//         while (!pq.empty() && job[0] > time)
+//         {
+//             time += pq.top()[1];
+//             answer += time - pq.top()[0];
+//             pq.pop();
+//         }
+//         if (job[0] >= time)
+//             time = job[0];
+
+//         pq.push(job);
+//     }
+//     while (!pq.empty())
+//     {
+//         time += pq.top()[1];
+//         answer += time - pq.top()[0];
+//         pq.pop();
+//     }
+//     return answer / size;
+// }
+
+/*
+https://programmers.co.kr/learn/courses/30/lessons/42628?language=cpp
+이중우선순위큐
+문제 설명
+이중 우선순위 큐는 다음 연산을 할 수 있는 자료구조를 말합니다.
+
+명령어	수신 탑(높이)
+I 숫자	큐에 주어진 숫자를 삽입합니다.
+D 1	큐에서 최댓값을 삭제합니다.
+D -1	큐에서 최솟값을 삭제합니다.
+이중 우선순위 큐가 할 연산 operations가 매개변수로 주어질 때, 모든 연산을 처리한 후 큐가 비어있으면 [0,0] 비어있지 않으면 [최댓값, 최솟값]을 return 하도록 solution 함수를 구현해주세요.
+
+제한사항
+operations는 길이가 1 이상 1,000,000 이하인 문자열 배열입니다.
+operations의 원소는 큐가 수행할 연산을 나타냅니다.
+원소는 “명령어 데이터” 형식으로 주어집니다.- 최댓값/최솟값을 삭제하는 연산에서 최댓값/최솟값이 둘 이상인 경우, 하나만 삭제합니다.
+빈 큐에 데이터를 삭제하라는 연산이 주어질 경우, 해당 연산은 무시합니다.
+입출력 예
+operations	return
+["I 16","D 1"]	[0,0]
+["I 7","I 5","I -5","D -1"]	[7,5]
+*/
 #include <iostream>
+#include <string>
 #include <vector>
-#include <queue>
 #include <algorithm>
 
 using namespace std;
 
-class comp
+vector<int> solution(vector<string> operations)
 {
-public:
-    bool operator()(const vector<int> &l, const vector<int> &r) const
+    string operation;
+    vector<int> answer;
+    int value;
+
+    for (auto op : operations)
     {
-        return l[1] > r[1];
-    }
-};
+        operation = op.substr(0, 1);
+        value = stoi(op.substr(2));
 
-bool compareJob(const vector<int> &l, const vector<int> &r)
-{
-    return l[0] < r[0];
-}
-
-int solution(vector<vector<int> > jobs)
-{
-    int answer = 0;
-    int time = 0;
-    int size = jobs.size();
-    sort(jobs.begin(), jobs.end(), compareJob);    //이게 필승 함정카드..
-    priority_queue<vector<int>, vector<vector<int> >, comp> pq;
-
-    for (vector<int> job : jobs)
-    {
-        while (!pq.empty() && job[0] > time)
+        if (operation == "I")
         {
-            time += pq.top()[1];
-            answer += time - pq.top()[0];
-            pq.pop();
+            answer.insert(upper_bound(answer.begin(), answer.end(), value), value);
         }
-        if (job[0] >= time)
-            time = job[0];
+        else if (!answer.empty())
+        {
+            if (value == 1)
+                answer.erase(answer.end() - 1);
+            else
+                answer.erase(answer.begin());
+        }
+    }
 
-        pq.push(job);
-    }
-    while (!pq.empty())
-    {
-        time += pq.top()[1];
-        answer += time - pq.top()[0];
-        pq.pop();
-    }
-    return answer / size;
+    if (answer.empty())
+        answer.push_back(0);
+    return {answer.back(), answer.front()};
 }
 
 int main()
 {
-    cout << solution({{0, 3}, {1, 9}, {2, 6}}) << endl;
+    auto result = solution({"I 16", "D 1"});
+    cout << result[0] << "," << result[1] << endl;
     return 0;
 }

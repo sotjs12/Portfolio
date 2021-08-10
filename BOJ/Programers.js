@@ -235,3 +235,4 @@ function solution(bridge_length, maxWeight, truck_weights = []) {
 
     return answer;
 }
+
