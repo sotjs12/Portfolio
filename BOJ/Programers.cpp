@@ -1,6 +1,4 @@
 
-#include <iostream>
-
 /*
 https://programmers.co.kr/learn/courses/30/lessons/42577
 문제 설명
@@ -182,37 +180,55 @@ jobs	return
 
 */
 
-#include <string>
+#include <iostream>
 #include <vector>
 #include <queue>
+#include <algorithm>
 
 using namespace std;
+
+class comp
+{
+public:
+    bool operator()(const vector<int> &l, const vector<int> &r) const
+    {
+        return l[1] > r[1];
+    }
+};
+
+bool compareJob(const vector<int> &l, const vector<int> &r)
+{
+    return l[0] < r[0];
+}
 
 int solution(vector<vector<int> > jobs)
 {
     int answer = 0;
-    priority_queue<int, vector<int>, greater<pair<int, int> > > pq;
     int time = 0;
-    for (pair<int,int> job : jobs)
+    int size = jobs.size();
+    sort(jobs.begin(), jobs.end(), compareJob);    //이게 필승 함정카드..
+    priority_queue<vector<int>, vector<vector<int> >, comp> pq;
+
+    for (vector<int> job : jobs)
     {
-        while (!pq.empty() && job.first >= time)
+        while (!pq.empty() && job[0] > time)
         {
-            time += pq.top();
-            answer += time;
+            time += pq.top()[1];
+            answer += time - pq.top()[0];
             pq.pop();
         }
-        if (job.first >= time)
-            time = job.first;
+        if (job[0] >= time)
+            time = job[0];
 
-        pq.push(job.second);
+        pq.push(job);
     }
     while (!pq.empty())
     {
-        time += pq.top();
-        answer += time;
+        time += pq.top()[1];
+        answer += time - pq.top()[0];
         pq.pop();
     }
-    return answer / jobs.size();
+    return answer / size;
 }
 
 int main()
