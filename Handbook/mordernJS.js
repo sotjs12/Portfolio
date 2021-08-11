@@ -814,3 +814,194 @@ async function* fetchCommits(repo) {
     }
 
 })();
+
+
+let user = {
+    name: "John",
+    _password: "비밀",
+    checkPassword(value) {
+        // checkPassword(비밀번호 확인)는 _password를 읽을 수 있어야 합니다.
+        return value === this._password;
+    }
+};
+
+user = new Proxy(user, {
+    get(target, prop) {
+        if (prop.startsWith("_"))
+            throw new Error("접근이 제한되었습니다.");
+
+        let value = target[prop];
+        return (typeof value == "function") ? value.bind(target) : value;
+    },
+    set(target, prop, value) {
+        if (prop.startsWith("_"))
+            throw new Error("접근이 제한되었습니다.");
+
+        target[prop] = value;
+        return true;
+    },
+    deleteProperty(target, prop) {
+        if (prop.startsWith("_"))
+            throw new Error("접근이 제한되었습니다.");
+
+        delete target[prop];
+        return true;
+    },
+    ownKeys(target) {
+        return Object.keys(target).filter(key => !key.startsWith("_"));
+    }
+});
+
+
+// "get" 트랩이 _password 읽기를 막습니다.
+try {
+    alert(user._password); // Error: 접근이 제한되어있습니다.
+} catch (e) { alert(e.message); }
+
+// "set" 트랩이 _password에 값을 쓰는것을 막습니다.
+try {
+    user._password = "test"; // Error: 접근이 제한되어있습니다.
+} catch (e) { alert(e.message); }
+
+// "deleteProperty" 트랩이 _password 삭제를 막습니다.
+try {
+    delete user._password; // Error: 접근이 제한되어있습니다.
+} catch (e) { alert(e.message); }
+
+// "ownKeys" 트랩이 순회 대상에서 _password를 제외시킵니다.
+for (let key in user) alert(key); // name
+alert(user._password); // 비밀
+
+
+let user = {
+    _name: "Guest",
+    get name() {
+        return this._name;
+    }
+};
+
+let userProxy = new Proxy(user, {
+    get(target, prop, receiver) {
+        return target[prop]; // (*) target = user
+    }
+});
+
+let admin = {
+    __proto__: userProxy,
+    _name: "Admin"
+};
+
+// Expected: Admin
+alert(admin.name); // outputs: Guest (?!?)
+
+
+let user = {
+    _name: "Guest",
+    get name() {
+        return this._name;
+    }
+};
+
+let userProxy = new Proxy(user, {
+    get(target, prop, receiver) { // receiver = admin
+        return Reflect.get(target, prop, receiver); // (*)
+    }
+});
+
+
+let admin = {
+    __proto__: userProxy,
+    _name: "Admin"
+};
+
+alert(admin.name); // Admin
+
+let user = {
+    name: "John"
+};
+
+function wrap(target) {
+    return new Proxy(target, {
+        get(target, prop) {
+            if (!Reflect.has(...arguments))
+                throw new Error(`Property doesn't exist ${arguments[1]}`);
+            return Reflect.get(...arguments);
+        }
+    });
+}
+
+user = wrap(user);
+
+alert(user.name); // John
+alert(user.age); // ReferenceError: Property doesn't exist "age"
+
+
+//--------
+
+let array = [1, 2, 3];
+
+array = new Proxy(array, {
+    get(target, prop) {
+        if (prop < 0) prop = target.length + (prop % target.length);
+        return Reflect.get(target, prop);
+    }
+});
+
+alert(array[-1]); // 3
+alert(array[-2]); // 2
+
+
+let handlers = Symbol("handlers");
+function makeObservable(target) {
+    target[handlers] = [];
+    target.observe = function (handler) {
+        this[handlers].push(handler);
+    }
+    return new Proxy(target, {
+        set(target, prop, value) {
+            if (Reflect.set(...arguments)) {
+                target[handlers].forEach(handler => handler(prop, value));
+                return true;
+            }
+            return false;
+        }
+    });
+}
+
+let user = {};
+user = makeObservable(user);
+
+user.observe((key, value) => {
+    alert(`SET ${key}=${value}`);
+});
+
+user.name = "John"; // alerts: SET name=John
+
+
+let user = {
+    name: "John",
+    go: function () { alert(this.name) }
+};
+
+(user.go)() // () 앞에는 자동으로 세미콜론 안붙여줌
+
+/*
+'this' 값 알아내기
+중요도: 3
+아래 코드에선 다양한 방법으로 user.go()를 4번 연속 호출합니다.
+
+그런데 첫 번째((1))와 두 번째 호출((2)) 결과는 세 번째((3))와 네 번째((4)) 호출 결과와 다릅니다. 이유가 뭘까요?
+*/
+
+let obj, method;
+obj = {
+    go: function () { alert(this); }
+};
+
+obj.go();               // (1) [object Object]
+
+(obj.go)();             // (2) [object Object]
+
+(method = obj.go)();    // (3) undefined
+
+(obj.go || obj.stop)(); // (4) undefined
