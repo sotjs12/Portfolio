@@ -245,8 +245,3 @@ int DLL_GetNodeCount(Node *head)
 
 // CLL
 
-
-void Test()
-{
-	
-}

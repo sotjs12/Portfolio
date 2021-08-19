@@ -1,4 +1,5 @@
 #include <iostream>
+#include "LinkedList.h"
 
 using namespace std;
 
@@ -214,4 +215,29 @@ void Test_Graph_0()
 void Test()
 {
     Test_Graph_0();
+}
+
+void TopologicalSort(Vertex *v, Node **list);
+void TS_DFS(Vertex *v, Node **list);
+
+void TopologicalSort(Vertex *v, Node **list)
+{
+    while (v != NULL && v->visited != NotVisited)
+    {
+        TS_DFS(v, list);
+        v = v->next;
+    }
+}
+void TS_DFS(Vertex *v, Node **list)
+{
+    v->visited = Visited;
+    Edge *e = v->adjacencyList;
+    while (e != NULL)
+    {
+        if (e->target != NULL && e->target->visited == NotVisited)
+            TS_DFS(e->target, list);
+        e = e->next;
+    }
+    Node *leaf = SLL_CreateNode(v->data);
+    SLL_InsertNewHead(list, leaf);
 }
