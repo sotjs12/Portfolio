@@ -1,4 +1,4 @@
-#include "DivideNConquer.h"
+#include "DynamicPrograming.h"
 #include <iostream>
 
 using namespace std;
