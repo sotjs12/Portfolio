@@ -1,4 +1,4 @@
-#include "MergeSort.h"
+#include "DivideNConquer.h"
 #include <iostream>
 
 using namespace std;
