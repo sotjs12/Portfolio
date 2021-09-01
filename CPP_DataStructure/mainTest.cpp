@@ -1,4 +1,4 @@
-#include "DynamicPrograming.h"
+#include "Greedy.h"
 #include <iostream>
 
 using namespace std;
