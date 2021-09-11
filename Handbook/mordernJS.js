@@ -1005,3 +1005,117 @@ obj.go();               // (1) [object Object]
 (method = obj.go)();    // (3) undefined
 
 (obj.go || obj.stop)(); // (4) undefined
+
+function work(a, b) {
+    alert(a + b); // work is an arbitrary function or method
+}
+
+function spy(func) {
+    return function wrapper() {
+        wrapper.calls.push(arguments);
+
+        return func.apply(this, arguments);
+    }
+}
+work = spy(work);
+
+work(1, 2); // 3
+work(4, 5); // 9
+
+for (let args of work.calls) {
+    alert('call:' + args.join()); // "call:1,2", "call:4,5"
+}
+
+function f(x) {
+    alert(x);
+}
+
+
+
+// create wrappers
+let f1000 = delay(f, 1000);
+let f1500 = delay(f, 1500);
+
+f1000("test"); // shows "test" after 1000ms
+f1500("test"); // shows "test" after 1500ms
+
+function throttle(func, ms) {
+
+    let isThrottled = false,
+        savedArgs,
+        savedThis;
+
+    function wrapper() {
+
+        if (isThrottled) { // (2)
+            savedArgs = arguments;
+            savedThis = this;
+            return;
+        }
+
+        func.apply(this, arguments); // (1)
+
+        isThrottled = true;
+
+        setTimeout(function () {
+            isThrottled = false; // (3)
+            if (savedArgs) {
+                wrapper.apply(savedThis, savedArgs);
+                savedArgs = savedThis = null;
+            }
+        }, ms);
+    }
+
+    return wrapper;
+}
+
+document.addEventListener("DOMContentLoaded", function () {
+    var lazyloadImages;
+
+    if ("IntersectionObserver" in window) {
+        lazyloadImages = document.querySelectorAll(".lazy");
+        var imageObserver = new IntersectionObserver(function (entries, observer) {
+            entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                    var image = entry.target;
+                    image.src = image.dataset.src;
+                    image.classList.remove("lazy");
+                    imageObserver.unobserve(image);
+                }
+            });
+        });
+
+        lazyloadImages.forEach(function (image) {
+            imageObserver.observe(image);
+        });
+    } else {
+        var lazyloadThrottleTimeout;
+        lazyloadImages = document.querySelectorAll(".lazy");
+
+        function lazyload() {
+            if (lazyloadThrottleTimeout) {
+                clearTimeout(lazyloadThrottleTimeout);
+            }
+
+            lazyloadThrottleTimeout = setTimeout(function () {
+                var scrollTop = window.pageYOffset;
+                lazyloadImages.forEach(function (img) {
+                    if (img.offsetTop < (window.innerHeight + scrollTop)) {
+                        img.src = img.dataset.src;
+                        img.classList.remove('lazy');
+                    }
+                });
+                if (lazyloadImages.length == 0) {
+                    document.removeEventListener("scroll", lazyload);
+                    window.removeEventListener("resize", lazyload);
+                    window.removeEventListener("orientationChange", lazyload);
+                }
+            }, 20);
+        }
+
+        document.addEventListener("scroll", lazyload);
+        window.addEventListener("resize", lazyload);
+        window.addEventListener("orientationChange", lazyload);
+    }
+})
+
