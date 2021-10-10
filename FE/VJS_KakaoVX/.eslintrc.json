@@ -4,7 +4,7 @@
         "es2021": true
     },
     "extends": [
-        "plugin:react/recommended",
+        // "plugin:react/recommended",
         "airbnb"
     ],
     "parser": "@typescript-eslint/parser",
@@ -16,8 +16,33 @@
         "sourceType": "module"
     },
     "plugins": [
-        "react",
+        // "react",
         "@typescript-eslint"
     ],
-    "rules": {}
+    "rules": {
+        "import/extensions": [
+            "error",
+            "ignorePackages",
+            {
+                "js": "never",
+                "jsx": "never",
+                "ts": "never",
+                "tsx": "never",
+                "json": "never"
+            }
+        ],
+        "class-methods-use-this": "off"
+    },
+    "settings": {
+        "import/resolver": {
+            "node": {
+                "extensions": [
+                    ".js",
+                    ".jsx",
+                    ".ts",
+                    ".tsx"
+                ]
+            }
+        }
+    }
 }
