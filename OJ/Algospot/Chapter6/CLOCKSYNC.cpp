@@ -63,7 +63,7 @@ int solve(int s)
 
 int main()
 {
-  freopen("C_6_4.txt", "r", stdin);
+  freopen("CLOCKSYNC.txt", "r", stdin);
   cin >> C;
   while (C--)
   {

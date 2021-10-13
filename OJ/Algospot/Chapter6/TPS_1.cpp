@@ -39,7 +39,7 @@ double solve(double len)
 
 int main()
 {
-    freopen("C_6_3.txt", "r", stdin);
+    freopen("TPS_1.txt", "r", stdin);
 
     cin >> C;
     while (C--)
